@@ -1,0 +1,62 @@
+#!/bin/bash
+
+################ SCRIPT DE BACKUP ################
+##################################################
+# PRIMEIRO GERAR A CHAVE DE SSH PARA NÃO PRECISAR DE SENHA
+# NO SSH.
+
+# VOCE VAI ENTRAR NO SERVIDOR ONDE SERA REALIZADO O BACKUP
+# E GERAR A CHAVE DE SSH  COM OS COMANDOS ABAIXO 
+
+
+# ssh-keygen
+# cd /root/.ssh/
+# ssh-copy-id  -i id_rsa.pub  usuario@ipDoServidor 
+
+# ( USUARIO E IP DO SERVIDOR AW2NET QUE VAI FICAR OS BACKUPS )
+
+
+################ INICIANDO O BACKUP ################
+####################################################
+
+#ssh -p 22252 aw2net@IP
+
+# Configurações do script
+# Onde, DIR_ORIG é o diretório a ser backupeado e DIR_DEST é o 
+# diretório para onde vai o arquivo compactado e BKP_NAME é o nome ao 
+# qual será compactado o diretório.
+DIR_ORIG="/etc/scripts/ "
+DIR_DEST="/tmp/backupRemoto252-"
+BKP_NAME="$(date +%d-%m-%Y).tgz"
+
+##################### REMOVENDO BACKUP ANTIGO#####################
+##############################################
+ 
+backupAtigo=$(date --date "15 days ago" +%d-%m-%Y)
+  if [ -d ${DIR_DEST}/$backupAntigo ] ; then
+        rm -rf ${DIR_DEST}/$backupAntigo
+  fi
+
+mkdir ${DIR_DEST}
+
+
+
+# compactação do diretório de origem diretamente no diretório de destino
+tar -czpf ${DIR_DEST}${BKP_NAME} ${DIR_ORIG}
+
+ 
+        
+#### ENVIANDO OS ARQUVIOS DE BACKUP PARA O SERVIDOR AW2NET ###########
+######################################################################
+
+scp -P2224 ${DIR_DEST}${BKP_NAME} root@IP:/backup-clientes/az4
+#scp ${DIR_DEST}${BKP_NAME}  marcello@192.168.10.106:/home/marcello/testeBackup
+
+
+
+################ ENVIANDO E-MAIL PARA CONFIRMAÇÃO DE BACKUP ################
+############################################################################
+
+#echo 'Realizado com sucesso - Verificar no servidor' | mutt -s 'Backup-AZ4GROUP' backupconf@aw2net.com.br
+
+#echo 'Realizado com sucesso - Verificar no servidor' | mutt -s 'Backup-EMPRESA' vmayrink@aw2net.com.br
